@@ -45,14 +45,7 @@ public class Main {
                     break;
 
                 case 4:  // Guardar inventario
-                    if (anadidas.isEmpty()){
-                        System.out.println("No se ha añadido ninguna fruta al inventario");
-                    } else {
-                        frutas.addAll(anadidas); // Unir las frutas de anadidas en frutas
-                        anadidas.clear(); // Limpiar Arraylist anadidas
-
-                        guardarInventario(frutas);
-                    }
+                    guardarInventario(anadidas, frutas);
                     break;
 
                 case 5:  // Salir
@@ -98,7 +91,7 @@ public class Main {
                 String [] partes = linea.split(";", -1); // Crear una array de Strings partes, trocear la línea leída mediante .split(), parámetro carácter de separación = ";",
                                                                     // limit: -1, en caso de que un campo esté vacío (1; "Ana";;1200) no se lo saltará, sino nos devuelve la posición vacía
 
-                if (partes.length != 4){  // Asegurar de que hayan cuatro campos en cada línea
+                if (partes.length != 4){  // Asegurar de que haya cuatro campos en cada línea
                     System.err.println("Línea con formato incorrecto: " + linea);
                 }
                 try {
@@ -168,30 +161,38 @@ public class Main {
         return anadidas;
     }
 
-    // Mostrar la lista de frutas añadidas
-    public static void listarFrutas(ArrayList<Fruta> anadidas){
+    // Mostrar la lista de frutas añadidas o inventario
+    public static void listarFrutas(ArrayList<Fruta> frutas){
 
-        if (anadidas.isEmpty()){
+        if (frutas.isEmpty()){
             System.out.println("La lista está vacía");
-        }
-        for (int i = 0; i < anadidas.size(); i++){  //    for (Fruta f : frutas) {
-            System.out.println(anadidas.get(i));    //      System.out.println(f);
+        } else {
+            for (int i = 0; i < frutas.size(); i++) {  //    for (Fruta f : frutas) {
+                System.out.println(frutas.get(i));    //      System.out.println(f);
+            }
         }
     }
 
     // Guardar inventario
-    public static void guardarInventario(ArrayList<Fruta> frutas){
+    public static void guardarInventario(ArrayList<Fruta> anadidas, ArrayList<Fruta> frutas) {
+        if (anadidas.isEmpty()) {
+            System.out.println("No se ha añadido ninguna fruta al inventario");
 
-        try (
-            BufferedWriter bw = Files.newBufferedWriter(RUTA, StandardCharsets.UTF_8) // Escribe y crea un archivo sino existe en esta RUTA y el conjunto de caracteres que queremos utilizar
-        ) {
-            for (Fruta f : frutas){
-                bw.write(f.getId() + ";" + f.getNombre() + ";" + f.getPrecio() + ";" + f.getStock());
-                bw.newLine(); // Salto de línea
+        } else {
+            try (BufferedWriter bw = Files.newBufferedWriter(RUTA, StandardCharsets.UTF_8)){ // Escribe y crea un archivo si no existe en esta RUTA y el conjunto de caracteres que queremos utilizar
+
+                frutas.addAll(anadidas); // Unir las frutas de anadidas en frutas
+                anadidas.clear(); // Limpiar Arraylist anadidas
+
+                for (Fruta f : frutas) {
+                    bw.write(f.getId() + ";" + f.getNombre() + ";" + f.getPrecio() + ";" + f.getStock());
+                    bw.newLine(); // Salto de línea
+                }
+                System.out.println("Inventario guardado con éxito");
+
+            } catch(IOException e){
+                e.printStackTrace(); // Muestra el tipo de excepción del fichero
             }
-            System.out.println("Inventario guardado con éxito");
-        } catch (IOException e) {
-            e.printStackTrace(); // Muestra el tipo de excepción del fichero
         }
     }
 }
